@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Cocina de Negro & Mechy 🐾 • Vanessa</title>
+  
+  <!-- SEO & PWA Meta -->
+  <meta name="description" content="Calculadora de rendimiento para la cocina de Negro y Mechy. Calcula gramos en crudo a partir de la porción cocida según pauta veterinaria.">
+  <meta name="theme-color" content="#F7F4EE">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Negro & Mechy">
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            cream: {
+              50: '#FDFBF7',
+              100: '#F7F4EE',
+              200: '#EFE9DE',
+              300: '#E2D9C8',
+            },
+            terracotta: {
+              50: '#FDF5F2',
+              100: '#FAECE6',
+              200: '#F4D4C7',
+              500: '#C86D51',
+              600: '#B65A3E',
+              700: '#94442C',
+            },
+            sage: {
+              50: '#F2F6F4',
+              100: '#E3ECE7',
+              200: '#CADBD1',
+              500: '#5E8A75',
+              600: '#4E7462',
+              700: '#3D5C4E',
+            },
+            warmgray: {
+              700: '#433E3B',
+              800: '#2E2B29',
+              900: '#1D1B1A',
+            }
+          },
+          boxShadow: {
+            'soft': '0 8px 30px rgba(0, 0, 0, 0.04)',
+            'card': '0 4px 20px rgba(184, 93, 67, 0.08)',
+            'clay': '0 6px 0 #D48268, 0 10px 20px rgba(0,0,0,0.06)',
+            'inner-soft': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.04)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Mobile-first kitchen ergonomics */
+    body {
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      height: 4px;
+      width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #E2D9C8;
+      border-radius: 9999px;
+    }
+    .active-tab {
+      background-color: #C86D51 !important;
+      color: #FFFFFF !important;
+      box-shadow: 0 4px 12px rgba(200, 109, 81, 0.25);
+    }
+    .active-card {
+      border-color: #C86D51 !important;
+      background-color: #FFFDFB !important;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(200, 109, 81, 0.15) !important;
+    }
+    /* Subtle pulse animation for result */
+    @keyframes subtlePop {
+      0% { transform: scale(0.97); opacity: 0.8; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-pop {
+      animation: subtlePop 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</head>
+<body class="bg-cream-100 text-warmgray-800 min-h-screen font-sans flex flex-col items-center pb-28 pt-2 antialiased">
+
+  <!-- Contenedor Principal Optimizado Móvil (Max-w-md para sensación de App Nativa) -->
+  <main class="w-full max-w-md px-4 flex flex-col gap-4">
+
+    <!-- Header con Amor para Negro & Mechy -->
+    <header class="pt-2 pb-1">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-11 h-11 rounded-2xl bg-terracotta-100 flex items-center justify-center text-terracotta-600 shadow-sm border border-terracotta-200/60 text-xl">
+            🐶
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <h1 class="text-base font-bold text-warmgray-900 tracking-tight leading-none">Cocina de Negro & Mechy</h1>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-terracotta-100 text-terracotta-700 font-bold border border-terracotta-200/70">Vanessa 🐾</span>
+            </div>
+            <p class="text-[11px] text-warmgray-700/70 mt-1 font-medium">Balanza con amor • Nutrición canina exacta</p>
+          </div>
+        </div>
+
+        <!-- Botón Info Rápida -->
+        <button id="btnInfoModal" aria-label="Información de factores" class="w-9 h-9 rounded-xl bg-white border border-cream-300/80 flex items-center justify-center text-warmgray-700 active:scale-95 transition-all shadow-sm">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 16v-4m0-4h.01"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Tarjetita de Cariño a los Perritos -->
+      <div class="mt-2.5 flex items-center justify-between bg-white/80 backdrop-blur-sm border border-cream-200/90 rounded-2xl px-3 py-1.5 shadow-xs">
+        <div class="flex items-center gap-1.5 text-[11px] font-semibold text-warmgray-800">
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-warmgray-900 text-white text-[10px]">
+            <span>🐕‍🦺</span> Negro
+          </span>
+          <span class="text-terracotta-500 text-xs">♥</span>
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-cream-200/80 text-warmgray-900 text-[10px] font-bold">
+            <span>🐩</span> Mechy
+          </span>
+        </div>
+        <span class="text-[10px] text-terracotta-600 font-semibold flex items-center gap-1">
+          <span>🦴</span> ¡Plato limpio garantizado!
+        </span>
+      </div>
+    </header>
+
+    <!-- Selector de Categorías (Pestañas Pills) -->
+    <nav class="flex p-1 bg-cream-200/70 rounded-2xl border border-cream-300/50 text-xs font-semibold" aria-label="Categorías de alimento">
+      <button onclick="setCategory('proteina')" id="tab-proteina" class="category-tab active-tab flex-1 py-2.5 rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5 text-warmgray-700">
+        <span>🥩</span>
+        <span>Proteínas</span>
+      </button>
+      <button onclick="setCategory('carbohidrato')" id="tab-carbohidrato" class="category-tab flex-1 py-2.5 rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5 text-warmgray-700">
+        <span>🍚</span>
+        <span>Carbos</span>
+      </button>
+      <button onclick="setCategory('verdura')" id="tab-verdura" class="category-tab flex-1 py-2.5 rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5 text-warmgray-700">
+        <span>🥦</span>
+        <span>Verduras</span>
+      </button>
+    </nav>
+
+    <!-- Carrusel / Rejilla de Alimentos de la Categoría Activa -->
+    <section>
+      <div class="flex items-center justify-between mb-1.5 px-0.5">
+        <span class="text-xs font-bold uppercase tracking-wider text-warmgray-700/60">Selecciona el alimento:</span>
+        <span id="categoryDescription" class="text-[11px] text-terracotta-600 font-medium">Pierden peso al deshidratar</span>
+      </div>
+      
+      <!-- Contenedor dinámico de alimentos con scroll táctil suave -->
+      <div id="foodsContainer" class="grid grid-cols-2 gap-2.5 max-h-52 overflow-y-auto pr-1 custom-scrollbar">
+        <!-- Renderizado dinámico vía JS -->
+      </div>
+    </section>
+
+    <!-- Panel de Entrada de Gramos Cocinados -->
+    <section class="bg-white rounded-3xl p-4 border border-cream-200 shadow-soft">
+      <div class="flex items-center justify-between mb-2">
+        <label for="cookedGramsInput" class="text-xs font-bold uppercase tracking-wider text-warmgray-700/70 flex items-center gap-1">
+          <svg class="w-3.5 h-3.5 text-terracotta-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M6 12h12m-9 6h6"></path>
+          </svg>
+          Gramos Cocinados Deseados
+        </label>
+        <span class="text-[11px] text-warmgray-700/60 font-semibold bg-cream-100 px-2 py-0.5 rounded-md border border-cream-200">
+          Lo que pide la receta
+        </span>
+      </div>
+
+      <!-- Display Principal de Gramos -->
+      <div class="relative flex items-center justify-center bg-cream-50 rounded-2xl border-2 border-cream-200/80 focus-within:border-terracotta-500 transition-colors p-2">
+        <input 
+          type="number" 
+          id="cookedGramsInput" 
+          inputmode="numeric" 
+          pattern="[0-9]*" 
+          value="150" 
+          min="1" 
+          max="5000"
+          placeholder="0"
+          class="w-full text-center text-4xl font-extrabold text-warmgray-900 bg-transparent focus:outline-none tracking-tight py-1"
+        />
+        <span class="absolute right-4 text-sm font-bold text-warmgray-700/50">g cocido</span>
+      </div>
+
+      <!-- Botones de Acceso Rápido Ergonómicos (Para usar con pulgar) -->
+      <div class="grid grid-cols-4 gap-2 mt-3">
+        <button onclick="addGrams(25)" class="py-2.5 rounded-xl bg-cream-100 hover:bg-cream-200/70 active:scale-95 text-xs font-bold text-warmgray-800 transition-all border border-cream-200/80 shadow-sm">
+          +25g
+        </button>
+        <button onclick="addGrams(50)" class="py-2.5 rounded-xl bg-cream-100 hover:bg-cream-200/70 active:scale-95 text-xs font-bold text-warmgray-800 transition-all border border-cream-200/80 shadow-sm">
+          +50g
+        </button>
+        <button onclick="addGrams(100)" class="py-2.5 rounded-xl bg-cream-100 hover:bg-cream-200/70 active:scale-95 text-xs font-bold text-warmgray-800 transition-all border border-cream-200/80 shadow-sm">
+          +100g
+        </button>
+        <button onclick="resetGrams()" class="py-2.5 rounded-xl bg-terracotta-50 hover:bg-terracotta-100 active:scale-95 text-xs font-bold text-terracotta-600 transition-all border border-terracotta-200/60 shadow-sm">
+          Limpiar
+        </button>
+      </div>
+
+      <!-- Fila de Valores Comunes Rápidos -->
+      <div class="flex items-center justify-between gap-1.5 mt-2.5 pt-2 border-t border-cream-100 text-[11px]">
+        <span class="text-warmgray-700/50 font-medium">Porciones frecuentes:</span>
+        <div class="flex gap-1.5">
+          <button onclick="setExactGrams(80)" class="px-2.5 py-1 rounded-lg bg-cream-50 hover:bg-cream-200 border border-cream-200 font-semibold text-warmgray-700">80g</button>
+          <button onclick="setExactGrams(120)" class="px-2.5 py-1 rounded-lg bg-cream-50 hover:bg-cream-200 border border-cream-200 font-semibold text-warmgray-700">120g</button>
+          <button onclick="setExactGrams(150)" class="px-2.5 py-1 rounded-lg bg-cream-50 hover:bg-cream-200 border border-cream-200 font-semibold text-warmgray-700">150g</button>
+          <button onclick="setExactGrams(200)" class="px-2.5 py-1 rounded-lg bg-cream-50 hover:bg-cream-200 border border-cream-200 font-semibold text-warmgray-700">200g</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tarjeta de Resultado Destacada (El momento 'WOW' en la cocina) -->
+    <section id="resultCard" class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-terracotta-500 via-terracotta-600 to-terracotta-700 text-white p-5 shadow-card transition-all">
+      <!-- Decoración sutil de fondo -->
+      <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
+      <div class="absolute -left-6 -top-6 w-24 h-24 bg-black/10 rounded-full blur-lg pointer-events-none"></div>
+
+      <div class="relative z-10 flex flex-col gap-2">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-1.5 text-terracotta-100 text-xs font-semibold uppercase tracking-wider">
+            <svg class="w-4 h-4 text-terracotta-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+            </svg>
+            <span>Pesar en la balanza antes de cocinar:</span>
+          </div>
+          <span id="factorBadge" class="bg-black/20 text-white/90 text-[10px] font-bold px-2 py-0.5 rounded-full border border-white/20">
+            Factor 0.65
+          </span>
+        </div>
+
+        <!-- Número Gigante de Resultado -->
+        <div class="flex items-baseline justify-between py-1">
+          <div class="flex items-baseline gap-2">
+            <span class="text-xs uppercase tracking-wider text-terracotta-200 font-bold">Pesar en crudo:</span>
+            <span id="rawWeightResult" class="text-5xl font-black tracking-tight drop-shadow-sm text-white animate-pop">
+              231
+            </span>
+            <span class="text-2xl font-bold text-terracotta-100">g</span>
+          </div>
+          <span class="inline-flex items-center gap-1 bg-white/20 text-white text-[10px] font-bold px-2 py-0.5 rounded-full border border-white/20">
+            🐾 Negro & Mechy
+          </span>
+        </div>
+
+        <!-- Explicación Clara y Educativa -->
+        <div class="bg-black/15 rounded-2xl p-3 backdrop-blur-sm border border-white/10 mt-1">
+          <p id="explanationNote" class="text-xs text-terracotta-50 leading-relaxed font-normal">
+            Para obtener <strong>150g</strong> de sobrebarriga cocida, debes pesar aprox. <strong>231g en crudo</strong> (pierde aprox. 35% por deshidratación y grasa).
+          </p>
+        </div>
+
+        <!-- Botón para Agregar al Batch Cooking -->
+        <button 
+          id="btnAddToBatch" 
+          onclick="addCurrentToBatch()" 
+          class="mt-2 w-full py-3 px-4 rounded-2xl bg-white text-terracotta-700 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 active:scale-98 transition-transform shadow-md hover:bg-cream-50"
+        >
+          <svg class="w-4 h-4 text-terracotta-600" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
+          </svg>
+          <span>Agregar a Mi Sesión de Cocina (Batch)</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Sección Modo Batch Cooking / Receta Completa -->
+    <section class="bg-white rounded-3xl p-4 border border-cream-200 shadow-soft">
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-xl bg-sage-100 text-sage-700 flex items-center justify-center">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-xs font-bold uppercase tracking-wider text-warmgray-900 leading-none">Sesión de Cocina (Batch)</h2>
+            <span class="text-[10px] text-terracotta-600 font-semibold">Porciones para Negro & Mechy 🐾</span>
+          </div>
+        </div>
+
+        <!-- Multiplicador de Porciones: 1, 4 y 8 días -->
+        <div class="flex items-center bg-cream-100 rounded-xl p-0.5 border border-cream-300/60 text-xs">
+          <button onclick="setMultiplier(1)" id="btnMul1" class="px-2.5 py-1 rounded-lg font-bold bg-white text-warmgray-900 shadow-sm transition-all">1 día</button>
+          <button onclick="setMultiplier(4)" id="btnMul4" class="px-2.5 py-1 rounded-lg font-bold text-warmgray-700 hover:text-warmgray-900 transition-all">4 días</button>
+          <button onclick="setMultiplier(8)" id="btnMul8" class="px-2.5 py-1 rounded-lg font-bold text-warmgray-700 hover:text-warmgray-900 transition-all">8 días</button>
+        </div>
+      </div>
+
+      <!-- Lista de Ingredientes en el Batch -->
+      <div id="batchList" class="divide-y divide-cream-100 my-2 max-h-48 overflow-y-auto custom-scrollbar">
+        <!-- Estado Vacío -->
+        <div id="batchEmptyState" class="py-6 text-center text-warmgray-700/50">
+          <span class="text-2xl block mb-1">🍲</span>
+          <p class="text-xs font-medium">No has agregado ingredientes aún.</p>
+          <p class="text-[11px] text-warmgray-700/40">Arma las porciones para 1, 4 u 8 días de comida aquí.</p>
+        </div>
+      </div>
+
+      <!-- Resumen de Totales y Botones de Acción -->
+      <div id="batchSummary" class="hidden pt-3 border-t border-cream-200 mt-2">
+        <div class="bg-sage-50 rounded-2xl p-3 border border-sage-200/80 mb-3">
+          <div class="flex items-center justify-between text-xs font-bold text-sage-800 mb-1">
+            <span>Total Crudo a Descongelar / Pesar:</span>
+            <span id="batchTotalWeight" class="text-base font-extrabold text-sage-700">0 g</span>
+          </div>
+          <p id="batchMultiplierHint" class="text-[10px] text-sage-600 font-medium">
+            Calculado para 1 porción / día.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <button 
+            onclick="copyBatchToClipboard()" 
+            id="btnCopyList"
+            class="py-2.5 px-3 rounded-xl bg-warmgray-900 hover:bg-black text-white text-xs font-bold flex items-center justify-center gap-1.5 active:scale-95 transition-all shadow-sm"
+          >
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+            </svg>
+            <span id="copyBtnText">Copiar Lista</span>
+          </button>
+
+          <button 
+            onclick="clearBatch()" 
+            class="py-2.5 px-3 rounded-xl bg-cream-100 hover:bg-cream-200 text-warmgray-700 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-95 transition-all border border-cream-200"
+          >
+            <svg class="w-3.5 h-3.5 text-warmgray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            </svg>
+            <span>Vaciar Lista</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tips de Cocina Canina (Acordeón discreto) -->
+    <details class="group bg-white rounded-2xl p-3.5 border border-cream-200 text-xs shadow-sm">
+      <summary class="flex items-center justify-between cursor-pointer font-bold text-warmgray-800 list-none">
+        <span class="flex items-center gap-1.5">
+          <span>💡</span> Consejos veterinarios para la cocción
+        </span>
+        <span class="text-terracotta-500 font-bold transition-transform group-open:rotate-180">▾</span>
+      </summary>
+      <div class="mt-2.5 pt-2 border-t border-cream-100 text-warmgray-700/80 leading-relaxed text-[11px] space-y-2">
+        <p>• <strong>Perritos felices (Negro & Mechy):</strong> Sirve las porciones tibias o a temperatura ambiente. El calor suave libera los aromas naturales de la carne y les abrirá el apetito de inmediato.</p>
+        <p>• <strong>Sin sal ni condimentos:</strong> Cocina todo al vapor o hervido sin cebolla, ajo ni condimentos tóxicos para caninos.</p>
+        <p>• <strong>Conserva el caldo:</strong> El agua de cocción de las carnes y verduras contiene vitaminas hidrosolubles; usa unas cucharaditas para humedecer el plato de Negro y Mechy.</p>
+        <p>• <strong>Pesar después de enfriar:</strong> Si pesas el cocinado recién salido de la olla, el vapor caliente altera unos gramos la balanza.</p>
+      </div>
+    </details>
+
+    <footer class="text-center py-2 text-[11px] text-warmgray-700/60 font-medium">
+      Cocinando con amor para <strong class="text-warmgray-900">Negro</strong> 🐕‍🦺 y <strong class="text-warmgray-900">Mechy</strong> 🐩 • Chef Vanessa ❤️🐾
+    </footer>
+
+  </main>
+
+  <!-- Modal de Información y Tabla de Factores -->
+  <div id="infoModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-5 shadow-2xl border border-cream-200 max-h-[85vh] overflow-y-auto custom-scrollbar flex flex-col gap-3">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold text-warmgray-900 flex items-center gap-2">
+          <span>📋</span> Factores Calibrados
+        </h3>
+        <button id="btnCloseModal" class="w-8 h-8 rounded-full bg-cream-100 flex items-center justify-center text-warmgray-700 font-bold">✕</button>
+      </div>
+
+      <p class="text-xs text-warmgray-700/70">
+        Fórmula científica aplicada:<br>
+        <code class="bg-cream-100 px-2 py-1 rounded text-terracotta-600 font-bold block mt-1 text-[11px]">
+          Peso Crudo = Gramos Cocinados / Factor
+        </code>
+      </p>
+
+      <div class="space-y-3 text-xs text-warmgray-800 mt-1">
+        <div>
+          <h4 class="font-bold text-terracotta-600 mb-1">🥩 Proteínas (Merman al cocinar):</h4>
+          <ul class="space-y-1 text-[11px] text-warmgray-700">
+            <li class="flex justify-between"><span>Sobrebarriga / Res sudada:</span> <strong>0.65 (-35%)</strong></li>
+            <li class="flex justify-between"><span>Pechuga de pollo hervida:</span> <strong>0.75 (-25%)</strong></li>
+            <li class="flex justify-between"><span>Muslo/Contramuslo deshuesado:</span> <strong>0.70 (-30%)</strong></li>
+            <li class="flex justify-between"><span>Hígado (res/pollo):</span> <strong>0.68 (-32%)</strong></li>
+            <li class="flex justify-between"><span>Lomo de cerdo magro:</span> <strong>0.72 (-28%)</strong></li>
+            <li class="flex justify-between"><span>Pescado blanco al vapor:</span> <strong>0.75 (-25%)</strong></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-warmgray-800 mb-1">🍚 Carbohidratos (Absorben agua):</h4>
+          <ul class="space-y-1 text-[11px] text-warmgray-700">
+            <li class="flex justify-between"><span>Arroz blanco/integral:</span> <strong>2.80 (rinde x2.8)</strong></li>
+            <li class="flex justify-between"><span>Avena en hojuelas cocida:</span> <strong>3.20 (rinde x3.2)</strong></li>
+            <li class="flex justify-between"><span>Papa / Camote al vapor:</span> <strong>0.95 (-5%)</strong></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-sage-600 mb-1">🥦 Verduras Aconsejadas:</h4>
+          <ul class="space-y-1 text-[11px] text-warmgray-700">
+            <li class="flex justify-between"><span>Zanahoria / Auyama:</span> <strong>0.85 (-15%)</strong></li>
+            <li class="flex justify-between"><span>Calabacín / Zucchini:</span> <strong>0.75 (-25%)</strong></li>
+            <li class="flex justify-between"><span>Espinaca cocida:</span> <strong>0.70 (-30%)</strong></li>
+            <li class="flex justify-between"><span>Brócoli al vapor:</span> <strong>0.85 (-15%)</strong></li>
+          </ul>
+        </div>
+      </div>
+
+      <button id="btnGotItModal" class="mt-2 w-full py-2.5 rounded-xl bg-terracotta-500 text-white font-bold text-xs">
+        ¡Listo para cocinarle a Negro & Mechy! 🐾
+      </button>
+    </div>
+  </div>
+
+  <!-- Toast Notification Rápida -->
+  <div id="toastNotification" class="fixed bottom-6 bg-warmgray-900 text-white px-4 py-2.5 rounded-2xl text-xs font-semibold shadow-lg transform translate-y-24 opacity-0 transition-all duration-300 flex items-center gap-2 z-50 pointer-events-none">
+    <span id="toastIcon">✨</span>
+    <span id="toastMessage">Acción completada</span>
+  </div>
+
+  <!-- Lógica en JavaScript Nativo -->
+  <script>
+    // Base de datos de alimentos con factores exactos solicitados
+    const FOOD_DATABASE = {
+      proteina: [
+        {
+          id: 'res_sobrebarriga',
+          name: 'Sobrebarriga / Res',
+          subtitle: 'Cocida o sudada',
+          icon: '🥩',
+          factor: 0.65,
+          note: 'Pierde aprox. 35% de peso por deshidratación y grasa.'
+        },
+        {
+          id: 'pollo_pechuga',
+          name: 'Pechuga de Pollo',
+          subtitle: 'Hervida o a la plancha',
+          icon: '🍗',
+          factor: 0.75,
+          note: 'Pierde aprox. 25% de peso al cocinarse.'
+        },
+        {
+          id: 'pollo_muslo',
+          name: 'Muslo / Contramuslo',
+          subtitle: 'Deshuesado cocido',
+          icon: '🍗',
+          factor: 0.70,
+          note: 'Pierde aprox. 30% de peso.'
+        },
+        {
+          id: 'higado',
+          name: 'Hígado (Res / Pollo)',
+          subtitle: 'Cocido al vapor o agua',
+          icon: '🫀',
+          factor: 0.68,
+          note: 'Pierde aprox. 32% de peso.'
+        },
+        {
+          id: 'cerdo_lomo',
+          name: 'Lomo de Cerdo Magro',
+          subtitle: 'Cocido sin grasa visible',
+          icon: '🥩',
+          factor: 0.72,
+          note: 'Pierde aprox. 28% de peso.'
+        },
+        {
+          id: 'pescado_blanco',
+          name: 'Pescado Blanco',
+          subtitle: 'Merluza o tilapia al vapor',
+          icon: '🐟',
+          factor: 0.75,
+          note: 'Pierde aprox. 25% de peso al vapor.'
+        }
+      ],
+      carbohidrato: [
+        {
+          id: 'arroz',
+          name: 'Arroz Blanco / Integral',
+          subtitle: 'Grano cocido',
+          icon: '🍚',
+          factor: 2.80,
+          note: 'Absorbe agua: 100g en crudo rinden ~280g cocido.'
+        },
+        {
+          id: 'avena',
+          name: 'Avena en Hojuelas',
+          subtitle: 'Cocida en agua',
+          icon: '🥣',
+          factor: 3.20,
+          note: 'Absorbe mucha agua: rinde aprox. 3.2 veces su peso.'
+        },
+        {
+          id: 'papa_camote',
+          name: 'Papa / Camote (Batata)',
+          subtitle: 'Al vapor o hervida',
+          icon: '🥔',
+          factor: 0.95,
+          note: 'Casi no varía de peso: pierde aprox. 5% de agua.'
+        }
+      ],
+      verdura: [
+        {
+          id: 'zanahoria_auyama',
+          name: 'Zanahoria / Auyama',
+          subtitle: 'Calabaza al vapor',
+          icon: '🥕',
+          factor: 0.85,
+          note: 'Pierde aprox. 15% de agua al vapor.'
+        },
+        {
+          id: 'calabacin',
+          name: 'Calabacín / Zucchini',
+          subtitle: 'Cocido o al vapor',
+          icon: '🥒',
+          factor: 0.75,
+          note: 'Pierde aprox. 25% por su alto contenido de agua.'
+        },
+        {
+          id: 'espinaca',
+          name: 'Espinaca Cocida',
+          subtitle: 'Hervida o al vapor',
+          icon: '🥬',
+          factor: 0.70,
+          note: 'Merma bastante volumen y un 30% de peso.'
+        },
+        {
+          id: 'brocoli',
+          name: 'Brócoli al Vapor',
+          subtitle: 'Cocido suave para perros',
+          icon: '🥦',
+          factor: 0.85,
+          note: 'Pierde aprox. 15% de peso.'
+        }
+      ]
+    };
+
+    // Estado global de la aplicación
+    let currentCategory = 'proteina';
+    let selectedFood = FOOD_DATABASE.proteina[0]; // Por defecto: Sobrebarriga / Res
+    let batchItems = [];
+    let currentMultiplier = 1;
+
+    // Elementos DOM
+    const cookedGramsInput = document.getElementById('cookedGramsInput');
+    const rawWeightResult = document.getElementById('rawWeightResult');
+    const factorBadge = document.getElementById('factorBadge');
+    const explanationNote = document.getElementById('explanationNote');
+    const foodsContainer = document.getElementById('foodsContainer');
+    const categoryDescription = document.getElementById('categoryDescription');
+
+    // Inicialización
+    function init() {
+      renderFoodCards();
+      calculate();
+      setupEventListeners();
+    }
+
+    // Configurar escuchadores de eventos
+    function setupEventListeners() {
+      cookedGramsInput.addEventListener('input', calculate);
+
+      // Modal de información
+      const btnInfoModal = document.getElementById('btnInfoModal');
+      const infoModal = document.getElementById('infoModal');
+      const btnCloseModal = document.getElementById('btnCloseModal');
+      const btnGotItModal = document.getElementById('btnGotItModal');
+
+      btnInfoModal.addEventListener('click', () => infoModal.classList.remove('hidden'));
+      btnCloseModal.addEventListener('click', () => infoModal.classList.add('hidden'));
+      btnGotItModal.addEventListener('click', () => infoModal.classList.add('hidden'));
+      infoModal.addEventListener('click', (e) => {
+        if (e.target === infoModal) infoModal.classList.add('hidden');
+      });
+    }
+
+    // Cambiar de Categoría
+    function setCategory(categoryKey) {
+      if (currentCategory === categoryKey) return;
+      currentCategory = categoryKey;
+
+      // Actualizar estilo visual de las pestañas
+      document.querySelectorAll('.category-tab').forEach(tab => {
+        tab.classList.remove('active-tab');
+      });
+      document.getElementById(`tab-${categoryKey}`).classList.add('active-tab');
+
+      // Descripción contextual
+      if (categoryKey === 'proteina') {
+        categoryDescription.textContent = 'Pierden peso al deshidratar';
+      } else if (categoryKey === 'carbohidrato') {
+        categoryDescription.textContent = 'Absorben agua y aumentan peso';
+      } else {
+        categoryDescription.textContent = 'Merman agua al cocer';
+      }
+
+      // Seleccionar el primer alimento de la nueva categoría por comodidad
+      selectedFood = FOOD_DATABASE[categoryKey][0];
+      renderFoodCards();
+      calculate();
+      triggerHaptic();
+    }
+
+    // Renderizar tarjetas de alimentos
+    function renderFoodCards() {
+      foodsContainer.innerHTML = '';
+      const foods = FOOD_DATABASE[currentCategory];
+
+      foods.forEach(food => {
+        const isSelected = selectedFood.id === food.id;
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.onclick = () => selectFood(food);
+        card.className = `p-3 rounded-2xl border text-left transition-all flex flex-col justify-between ${
+          isSelected 
+            ? 'active-card border-terracotta-500 bg-white ring-1 ring-terracotta-500' 
+            : 'bg-white border-cream-200/90 hover:border-cream-300'
+        }`;
+
+        card.innerHTML = `
+          <div class="flex items-start justify-between w-full">
+            <span class="text-2xl">${food.icon}</span>
+            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-md ${
+              food.factor >= 1.0 ? 'bg-sage-100 text-sage-700' : 'bg-terracotta-100 text-terracotta-700'
+            }">
+              f: ${food.factor}
+            </span>
+          </div>
+          <div class="mt-2">
+            <h4 class="text-xs font-bold text-warmgray-900 leading-tight">${food.name}</h4>
+            <p class="text-[10px] text-warmgray-700/60 font-medium truncate mt-0.5">${food.subtitle}</p>
+          </div>
+        `;
+        foodsContainer.appendChild(card);
+      });
+    }
+
+    // Seleccionar alimento individual
+    function selectFood(food) {
+      selectedFood = food;
+      renderFoodCards();
+      calculate();
+      triggerHaptic();
+    }
+
+    // Lógica Central de Cálculo
+    function calculate() {
+      const cookedGrams = parseFloat(cookedGramsInput.value) || 0;
+
+      if (cookedGrams <= 0) {
+        rawWeightResult.textContent = '0';
+        explanationNote.innerHTML = 'Ingresa los gramos cocinados que requiere tu perrito para ver el peso en crudo.';
+        factorBadge.textContent = `Factor ${selectedFood.factor}`;
+        return;
+      }
+
+      // Fórmula: Gramos Crudo = Gramos Cocinados / Factor
+      const rawGramsExact = cookedGrams / selectedFood.factor;
+      const rawGramsRounded = Math.round(rawGramsExact);
+
+      // Efecto suave de refresco
+      rawWeightResult.classList.remove('animate-pop');
+      void rawWeightResult.offsetWidth; // reset animation
+      rawWeightResult.classList.add('animate-pop');
+
+      rawWeightResult.textContent = rawGramsRounded;
+      factorBadge.textContent = `Factor ${selectedFood.factor}`;
+
+      // Redacción contextual según si absorbe o reduce
+      let explanation = '';
+      if (selectedFood.factor >= 1.0) {
+        explanation = `Como <strong>${selectedFood.name}</strong> rinde al cocinarse (factor ${selectedFood.factor}), para servir <strong>${cookedGrams}g cocidos</strong> a Negro y Mechy solo necesitas pesar aprox. <strong>${rawGramsRounded}g en crudo</strong>.`;
+      } else {
+        const merma = Math.round((1 - selectedFood.factor) * 100);
+        explanation = `Para servir <strong>${cookedGrams}g</strong> de ${selectedFood.name.toLowerCase()} cocido a Negro y Mechy, pesa aprox. <strong>${rawGramsRounded}g en crudo</strong> (merma aprox. un ${merma}% por cocción).`;
+      }
+
+      explanationNote.innerHTML = explanation;
+    }
+
+    // Funciones auxiliares de botones rápidos
+    function addGrams(delta) {
+      const current = parseFloat(cookedGramsInput.value) || 0;
+      cookedGramsInput.value = Math.max(0, current + delta);
+      calculate();
+      triggerHaptic();
+    }
+
+    function setExactGrams(amount) {
+      cookedGramsInput.value = amount;
+      calculate();
+      triggerHaptic();
+    }
+
+    function resetGrams() {
+      cookedGramsInput.value = '';
+      cookedGramsInput.focus();
+      calculate();
+      triggerHaptic();
+    }
+
+    // BATCH COOKING / SESIÓN DE COCINA
+    function addCurrentToBatch() {
+      const cookedGrams = parseFloat(cookedGramsInput.value) || 0;
+      if (cookedGrams <= 0) {
+        showToast('⚠️ Ingresa una cantidad válida de gramos');
+        return;
+      }
+
+      const rawGramsExact = cookedGrams / selectedFood.factor;
+      const rawGramsRounded = Math.round(rawGramsExact);
+
+      const newItem = {
+        id: Date.now(),
+        foodName: selectedFood.name,
+        icon: selectedFood.icon,
+        cookedGrams: cookedGrams,
+        rawGrams: rawGramsRounded,
+        factor: selectedFood.factor
+      };
+
+      batchItems.push(newItem);
+      renderBatchList();
+      showToast(`✅ Agregado: ${newItem.foodName} (${rawGramsRounded}g crudo)`);
+      triggerHaptic();
+    }
+
+    function setMultiplier(mul) {
+      currentMultiplier = mul;
+      [1, 4, 8].forEach(val => {
+        const btn = document.getElementById(`btnMul${val}`);
+        if (btn) {
+          if (val === mul) {
+            btn.className = "px-2.5 py-1 rounded-lg font-bold bg-white text-warmgray-900 shadow-sm transition-all";
+          } else {
+            btn.className = "px-2.5 py-1 rounded-lg font-bold text-warmgray-700 hover:text-warmgray-900 transition-all";
+          }
+        }
+      });
+
+      const hint = document.getElementById('batchMultiplierHint');
+      if (mul === 1) {
+        hint.innerHTML = 'Calculado para <strong>1 ración diaria</strong> de Negro & Mechy 🐾';
+      } else {
+        hint.innerHTML = `Calculado para <strong>${mul} días de comida lista</strong> para consentir a Negro y Mechy 🐕‍🦺🐩 (x${mul}).`;
+      }
+
+      renderBatchList();
+      triggerHaptic();
+    }
+
+    function removeBatchItem(id) {
+      batchItems = batchItems.filter(item => item.id !== id);
+      renderBatchList();
+      triggerHaptic();
+    }
+
+    function clearBatch() {
+      if (batchItems.length === 0) return;
+      batchItems = [];
+      renderBatchList();
+      showToast('🗑️ Lista de cocina vaciada');
+      triggerHaptic();
+    }
+
+    function renderBatchList() {
+      const batchListEl = document.getElementById('batchList');
+      const batchSummaryEl = document.getElementById('batchSummary');
+      const batchEmptyState = document.getElementById('batchEmptyState');
+      const batchTotalWeightEl = document.getElementById('batchTotalWeight');
+
+      if (batchItems.length === 0) {
+        batchListEl.innerHTML = `
+          <div id="batchEmptyState" class="py-6 text-center text-warmgray-700/50">
+            <span class="text-2xl block mb-1">🍲</span>
+            <p class="text-xs font-medium">No has agregado ingredientes aún.</p>
+            <p class="text-[11px] text-warmgray-700/40">Arma las porciones para 1, 4 u 8 días para Negro y Mechy.</p>
+          </div>
+        `;
+        batchSummaryEl.classList.add('hidden');
+        return;
+      }
+
+      batchListEl.innerHTML = '';
+      let totalRawGrams = 0;
+
+      batchItems.forEach(item => {
+        const itemRawMultiplied = Math.round(item.rawGrams * currentMultiplier);
+        const itemCookedMultiplied = Math.round(item.cookedGrams * currentMultiplier);
+        totalRawGrams += itemRawMultiplied;
+
+        const row = document.createElement('div');
+        row.className = 'py-2.5 flex items-center justify-between text-xs';
+        row.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="text-base">${item.icon}</span>
+            <div>
+              <span class="font-bold text-warmgray-900">${item.foodName}</span>
+              <div class="text-[10px] text-warmgray-700/60">
+                Pide: ${itemCookedMultiplied}g cocido ${currentMultiplier > 1 ? `(${item.cookedGrams}g x ${currentMultiplier})` : ''}
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="text-right">
+              <span class="font-extrabold text-terracotta-600 text-sm">${itemRawMultiplied}g</span>
+              <span class="block text-[9px] uppercase font-bold text-warmgray-700/40">Crudo</span>
+            </div>
+            <button onclick="removeBatchItem(${item.id})" class="p-1 rounded-lg text-warmgray-700/40 hover:text-red-500 active:scale-95 transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        `;
+        batchListEl.appendChild(row);
+      });
+
+      batchTotalWeightEl.textContent = `${totalRawGrams} g`;
+      batchSummaryEl.classList.remove('hidden');
+    }
+
+    // Copiar la lista al portapapeles con formato bonito para WhatsApp / Notas
+    function copyBatchToClipboard() {
+      if (batchItems.length === 0) return;
+
+      let text = `🐾 *Menú Casero de Negro y Mechy • Por Vanessa* ❤️\n`;
+      text += `📅 Preparación calculada para: ${currentMultiplier} ${currentMultiplier === 1 ? 'día' : 'días'} de comida\n`;
+      text += `🐕‍🦺 Plato de Negro & 🐩 Plato de Mechy\n`;
+      text += `------------------------------------\n`;
+
+      let totalRaw = 0;
+      batchItems.forEach((item, index) => {
+        const itemRaw = Math.round(item.rawGrams * currentMultiplier);
+        const itemCooked = Math.round(item.cookedGrams * currentMultiplier);
+        totalRaw += itemRaw;
+        text += `${item.icon} *${item.foodName}*: ${itemRaw}g crudo _(rinde ${itemCooked}g cocido)_\n`;
+      });
+
+      text += `------------------------------------\n`;
+      text += `⚖️ *TOTAL EN CRUDO A PESAR:* ${totalRaw}g\n`;
+      text += `✨ ¡Negro y Mechy van a dejar el plato reluciente! ❤️🐶`;
+
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('📋 ¡Lista de Negro y Mechy copiada!');
+        const btnText = document.getElementById('copyBtnText');
+        const originalText = btnText.textContent;
+        btnText.textContent = '¡Copiado!';
+        setTimeout(() => { btnText.textContent = originalText; }, 2000);
+      }).catch(() => {
+        showToast('❌ No se pudo copiar al portapapeles');
+      });
+    }
+
+    // Toast flotante
+    let toastTimeout;
+    function showToast(message) {
+      const toast = document.getElementById('toastNotification');
+      const toastMessage = document.getElementById('toastMessage');
+      
+      toastMessage.textContent = message;
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.add('translate-y-24', 'opacity-0');
+        toast.classList.remove('translate-y-0', 'opacity-100');
+      }, 2500);
+    }
+
+    // Micro-vibración háptica táctil para teléfonos
+    function triggerHaptic() {
+      if (window.navigator && window.navigator.vibrate) {
+        window.navigator.vibrate(8);
+      }
+    }
+
+    // Ejecutar inicialización al cargar
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
